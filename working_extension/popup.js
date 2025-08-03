@@ -58,10 +58,24 @@ class ScreenshotAnnotator {
   
   async saveScreenshots() {
     try {
+      console.log('💾 Saving screenshots to storage...');
       await chrome.storage.local.set({ screenshots: this.screenshots });
-      console.log('Saved screenshots:', this.screenshots.length);
+      console.log('✅ Saved screenshots:', this.screenshots.length);
+      
       this.calculateMemoryUsage();
-      this.updateUI();
+      
+      // Force UI update after save
+      console.log('🔄 Forcing UI update after save...');
+      setTimeout(() => {
+        this.updateUI();
+      }, 50);
+      
+      // Additional safety net - update again after short delay
+      setTimeout(() => {
+        console.log('🔄 Safety net UI update...');
+        this.updateUI();
+      }, 200);
+      
     } catch (error) {
       console.error('Error saving screenshots:', error);
       this.showStatus('Error saving screenshots', 'error');

@@ -154,11 +154,14 @@ frontend:
     file: "/app/working_extension/content.js"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Added speech recognition functionality to annotation overlay. Uses Web Speech API for voice-to-text input. Needs browser testing to verify microphone permissions and functionality."
+      - working: "NA"
+        agent: "testing"
+        comment: "Cannot test speech-to-text functionality due to system limitations (requires microphone access and browser permissions). Code structure appears correct with proper Web Speech API implementation and error handling."
 
   - task: "Annotation Overlay System"
     implemented: true

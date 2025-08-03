@@ -189,3 +189,5 @@ agent_communication:
     message: "Implemented browser extension with screenshot capture, speech-to-text annotations, and proper icons. Main issue: screenshots capture but don't display in popup list. User confirmed capture works but UI display is broken. Need to test extension loading and UI functionality."
   - agent: "main"
     message: "Created test page at /app/test_extension.html to debug extension functionality. Extension files are ready for browser testing but require manual loading in Chrome/Edge developer mode."
+  - agent: "testing"
+    message: "CRITICAL ISSUE IDENTIFIED: Extension popup UI not updating after screenshot capture. Code analysis reveals proper structure but potential timing/async issues. Screenshots save to storage but UI doesn't reflect changes. Root cause: updateUI() method called correctly but DOM updates may not be triggering properly in extension environment. Extension requires manual browser loading for proper testing - cannot be fully tested in automation environment."

@@ -73,13 +73,28 @@ class AnnotationOverlay {
     // Text input
     const textInput = document.createElement('input');
     textInput.type = 'text';
-    textInput.placeholder = 'Enter annotation text...';
+    textInput.placeholder = 'Enter annotation text or use speech...';
     textInput.style.cssText = `
       padding: 8px 12px;
       border: 1px solid #ddd;
       border-radius: 4px;
       font-size: 14px;
       min-width: 250px;
+    `;
+    
+    // Speech-to-text button
+    const speechBtn = document.createElement('button');
+    speechBtn.textContent = '🎤';
+    speechBtn.title = 'Speech to Text';
+    speechBtn.style.cssText = `
+      padding: 8px 12px;
+      background: #ff5722;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      min-width: 40px;
     `;
     
     // Add button

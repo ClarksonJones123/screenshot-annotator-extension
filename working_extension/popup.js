@@ -191,25 +191,51 @@ class ScreenshotAnnotator {
   }
   
   updateUI() {
+    console.log('=== UPDATEUI DEBUG START ===');
     console.log('Updating UI - Screenshots:', this.screenshots.length);
+    console.log('Screenshots data:', this.screenshots.map(s => ({id: s.id, title: s.title})));
     
     // Update memory info
-    document.getElementById('memoryUsage').textContent = this.formatMemorySize(this.memoryUsage);
-    document.getElementById('screenshotCount').textContent = this.screenshots.length;
+    const memoryElement = document.getElementById('memoryUsage');
+    const countElement = document.getElementById('screenshotCount');
+    
+    if (memoryElement) {
+      memoryElement.textContent = this.formatMemorySize(this.memoryUsage);
+      console.log('✅ Updated memory usage:', memoryElement.textContent);
+    } else {
+      console.error('❌ memoryUsage element not found');
+    }
+    
+    if (countElement) {
+      countElement.textContent = this.screenshots.length;
+      console.log('✅ Updated screenshot count:', countElement.textContent);
+    } else {
+      console.error('❌ screenshotCount element not found');
+    }
     
     // Update screenshots list
     const listElement = document.getElementById('screenshotsList');
+    if (!listElement) {
+      console.error('❌ screenshotsList element not found - UI cannot update!');
+      return;
+    }
+    
+    console.log('📋 Found screenshotsList element');
     
     if (this.screenshots.length === 0) {
+      console.log('📋 No screenshots - showing empty state');
       listElement.innerHTML = `
         <div class="empty-state">
           No screenshots yet.<br>Click "Capture Current Page" to get started.
         </div>`;
     } else {
+      console.log(`📋 Rendering ${this.screenshots.length} screenshots`);
       let html = '';
-      this.screenshots.forEach(screenshot => {
+      this.screenshots.forEach((screenshot, index) => {
         const isSelected = this.selectedScreenshot && this.selectedScreenshot.id === screenshot.id;
         const date = new Date(screenshot.timestamp).toLocaleString();
+        
+        console.log(`  📸 Screenshot ${index + 1}: ${screenshot.title} (selected: ${isSelected})`);
         
         html += `
           <div class="screenshot-item ${isSelected ? 'selected' : ''}" data-id="${screenshot.id}">
@@ -220,24 +246,43 @@ class ScreenshotAnnotator {
             </div>
           </div>`;
       });
+      
+      console.log('📋 Setting innerHTML with', html.length, 'characters');
       listElement.innerHTML = html;
       
       // Add click handlers
-      listElement.querySelectorAll('.screenshot-item').forEach(item => {
+      const screenshotItems = listElement.querySelectorAll('.screenshot-item');
+      console.log('📋 Adding click handlers to', screenshotItems.length, 'items');
+      
+      screenshotItems.forEach((item, index) => {
         item.addEventListener('click', () => {
           const screenshotId = item.dataset.id;
           this.selectedScreenshot = this.screenshots.find(s => s.id === screenshotId);
-          console.log('Selected screenshot:', this.selectedScreenshot?.id);
+          console.log('📸 Selected screenshot:', this.selectedScreenshot?.id);
           
           // Enable annotation button
-          document.getElementById('annotateBtn').disabled = false;
+          const annotateBtn = document.getElementById('annotateBtn');
+          if (annotateBtn) {
+            annotateBtn.disabled = false;
+            console.log('✅ Enabled annotation button');
+          }
           
           this.updateUI(); // Refresh to show selection
         });
       });
     }
     
-    console.log('UI updated successfully');
+    // Force a DOM refresh
+    setTimeout(() => {
+      const finalCheck = document.getElementById('screenshotsList');
+      if (finalCheck) {
+        console.log('🔍 Final DOM check - innerHTML length:', finalCheck.innerHTML.length);
+        console.log('🔍 Final DOM check - children count:', finalCheck.children.length);
+      }
+    }, 100);
+    
+    console.log('✅ UI update completed successfully');
+    console.log('=== UPDATEUI DEBUG END ===');
   }
   
   showStatus(message, type) {

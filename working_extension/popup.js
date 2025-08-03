@@ -11,7 +11,23 @@ class ScreenshotAnnotator {
     console.log('Initializing Screenshot Annotator...');
     await this.loadScreenshots();
     this.setupEventListeners();
+    this.setupStorageListener();
     this.updateUI();
+  }
+  
+  setupStorageListener() {
+    // Listen for storage changes to refresh UI
+    if (chrome.storage && chrome.storage.onChanged) {
+      chrome.storage.onChanged.addListener((changes, areaName) => {
+        if (areaName === 'local' && changes.screenshots) {
+          console.log('Storage changed, refreshing UI...');
+          this.screenshots = changes.screenshots.newValue || [];
+          this.calculateMemoryUsage();
+          this.updateUI();
+        }
+      });
+      console.log('Storage listener setup complete');
+    }
   }
   
   setupEventListeners() {

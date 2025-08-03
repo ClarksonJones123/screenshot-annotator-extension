@@ -85,7 +85,7 @@ class ScreenshotAnnotator {
       // Get current tab
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
       
-      // Directly capture visible tab using background script
+      // SIMPLIFIED APPROACH: Directly capture via background script
       const response = await chrome.runtime.sendMessage({ 
         action: 'captureVisibleTab' 
       });

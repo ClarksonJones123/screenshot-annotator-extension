@@ -301,5 +301,25 @@ class ScreenshotAnnotator {
 // Initialize when popup loads
 document.addEventListener('DOMContentLoaded', () => {
   console.log('DOM loaded, initializing app...');
-  new ScreenshotAnnotator();
+  window.screenshotAnnotator = new ScreenshotAnnotator();
+});
+
+// Also refresh UI when popup becomes visible (handles popup lifecycle)
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && window.screenshotAnnotator) {
+    console.log('Popup became visible, refreshing UI...');
+    window.screenshotAnnotator.loadScreenshots().then(() => {
+      window.screenshotAnnotator.updateUI();
+    });
+  }
+});
+
+// Handle popup focus (additional safety net)
+window.addEventListener('focus', () => {
+  if (window.screenshotAnnotator) {
+    console.log('Popup received focus, refreshing UI...');
+    window.screenshotAnnotator.loadScreenshots().then(() => {
+      window.screenshotAnnotator.updateUI();
+    });
+  }
 });

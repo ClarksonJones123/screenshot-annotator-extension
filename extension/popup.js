@@ -162,8 +162,7 @@ class ScreenshotAnnotator {
     try {
       this.showStatus('Generating PDF...', 'info');
       
-      // Simple PDF export using jsPDF (would need to include library)
-      // For now, we'll create a simple HTML export
+      // Simple HTML export
       const htmlContent = this.generateHTMLExport();
       
       // Create blob and download

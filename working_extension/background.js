@@ -4,6 +4,12 @@ console.log('Screenshot Annotator background script loaded');
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log('Background received message:', message.action);
   
+  if (message.action === 'ping') {
+    console.log('Ping received');
+    sendResponse({ success: true, message: 'Extension is working!' });
+    return true;
+  }
+  
   if (message.action === 'captureVisibleTab') {
     console.log('Capturing visible tab...');
     

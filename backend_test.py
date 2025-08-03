@@ -8,7 +8,7 @@ from datetime import datetime
 import json
 
 class ScreenshotAPITester:
-    def __init__(self, base_url="https://a94e0096-2120-40ab-94be-a87e0b28a87f.preview.emergentagent.com"):
+    def __init__(self, base_url="https://d8e0e3a3-234e-4d2f-a002-aab6775865dc.preview.emergentagent.com"):
         self.base_url = base_url
         self.api_url = f"{base_url}/api"
         self.tests_run = 0

@@ -168,6 +168,64 @@ class AnnotationOverlay {
     document.body.appendChild(this.overlay);
     
     // Event handlers
+    let recognition = null;
+    let isListening = false;
+    
+    // Speech recognition setup
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = 'en-US';
+      
+      recognition.onstart = () => {
+        isListening = true;
+        speechBtn.textContent = '🔴';
+        speechBtn.style.background = '#f44336';
+        status.textContent = 'Listening... Speak your annotation text.';
+      };
+      
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        textInput.value = transcript;
+        status.textContent = 'Speech captured! You can edit the text or add the annotation.';
+      };
+      
+      recognition.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        status.textContent = 'Speech recognition error. Please try again or type manually.';
+      };
+      
+      recognition.onend = () => {
+        isListening = false;
+        speechBtn.textContent = '🎤';
+        speechBtn.style.background = '#ff5722';
+      };
+    } else {
+      speechBtn.disabled = true;
+      speechBtn.title = 'Speech recognition not supported in this browser';
+      speechBtn.style.opacity = '0.5';
+    }
+    
+    speechBtn.addEventListener('click', () => {
+      if (!recognition) {
+        alert('Speech recognition is not supported in this browser');
+        return;
+      }
+      
+      if (isListening) {
+        recognition.stop();
+      } else {
+        try {
+          recognition.start();
+        } catch (error) {
+          console.error('Error starting speech recognition:', error);
+          status.textContent = 'Could not start speech recognition. Please check microphone permissions.';
+        }
+      }
+    });
+    
     addBtn.addEventListener('click', () => {
       const text = textInput.value.trim();
       if (!text) {

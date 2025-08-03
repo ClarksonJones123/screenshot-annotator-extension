@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Extension Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background: #e8f5e8;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+        }
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #ffcdd2;
+        }
+        .info {
+            background: #e3f2fd;
+            color: #1565c0;
+            border: 1px solid #bbdefb;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-primary {
+            background: #1976d2;
+            color: white;
+        }
+        .btn-danger {
+            background: #d32f2f;
+            color: white;
+        }
+        #results {
+            white-space: pre-wrap;
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Screenshot Annotator Extension Test</h1>
+    
+    <div class="test-section">
+        <h2>Chrome Extension API Tests</h2>
+        <p>This page tests the Screenshot Annotator extension functionality.</p>
+        
+        <button class="btn-primary" onclick="testExtensionPresence()">
+            Test Extension Presence
+        </button>
+        
+        <button class="btn-primary" onclick="testStorage()">
+            Test Local Storage
+        </button>
+        
+        <button class="btn-primary" onclick="testScreenshotLogic()">
+            Test Screenshot Logic
+        </button>
+        
+        <button class="btn-danger" onclick="clearResults()">
+            Clear Results
+        </button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Results</h2>
+        <div id="results">Click a test button to see results...</div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const timestamp = new Date().toLocaleTimeString();
+            results.textContent += `[${timestamp}] ${type.toUpperCase()}: ${message}\n`;
+            results.scrollTop = results.scrollHeight;
+        }
+
+        function clearResults() {
+            document.getElementById('results').textContent = '';
+        }
+
+        async function testExtensionPresence() {
+            log('Testing extension presence...', 'info');
+            
+            if (typeof chrome !== 'undefined' && chrome.runtime) {
+                log('✅ Chrome extension API available', 'success');
+                
+                try {
+                    const response = await chrome.runtime.sendMessage({action: 'ping'});
+                    log('✅ Extension communication works', 'success');
+                } catch (error) {
+                    log('❌ Extension communication failed: ' + error.message, 'error');
+                }
+            } else {
+                log('❌ Chrome extension API not available', 'error');
+            }
+        }
+
+        async function testStorage() {
+            log('Testing local storage...', 'info');
+            
+            if (typeof chrome !== 'undefined' && chrome.storage) {
+                try {
+                    const testData = {test: 'value', timestamp: Date.now()};
+                    await chrome.storage.local.set({testData});
+                    log('✅ Storage write successful', 'success');
+                    
+                    const result = await chrome.storage.local.get('testData');
+                    if (result.testData) {
+                        log('✅ Storage read successful: ' + JSON.stringify(result.testData), 'success');
+                    } else {
+                        log('❌ Storage read failed - no data found', 'error');
+                    }
+                    
+                    // Test screenshot storage structure
+                    const screenshotResult = await chrome.storage.local.get('screenshots');
+                    if (screenshotResult.screenshots) {
+                        log(`✅ Found ${screenshotResult.screenshots.length} stored screenshots`, 'success');
+                        screenshotResult.screenshots.forEach((screenshot, index) => {
+                            log(`Screenshot ${index + 1}: ${screenshot.title} (${screenshot.timestamp})`, 'info');
+                        });
+                    } else {
+                        log('ℹ️ No screenshots found in storage', 'info');
+                    }
+                    
+                } catch (error) {
+                    log('❌ Storage test failed: ' + error.message, 'error');
+                }
+            } else {
+                log('❌ Chrome storage API not available', 'error');
+            }
+        }
+
+        async function testScreenshotLogic() {
+            log('Testing screenshot capture logic...', 'info');
+            
+            if (typeof chrome !== 'undefined' && chrome.tabs) {
+                try {
+                    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+                    log(`✅ Current tab: ${tab.title} (${tab.url})`, 'success');
+                    
+                    // Test background script communication
+                    const response = await chrome.runtime.sendMessage({ action: 'captureVisibleTab' });
+                    if (response && response.imageData) {
+                        log('✅ Screenshot capture successful!', 'success');
+                        log(`Image data size: ${Math.round(response.imageData.length / 1024)} KB`, 'info');
+                        
+                        // Test creating screenshot object
+                        const screenshot = {
+                            id: Date.now().toString(),
+                            imageData: response.imageData,
+                            originalWidth: 1920,
+                            originalHeight: 1080,
+                            displayWidth: Math.round(1920 * 0.9),
+                            displayHeight: Math.round(1080 * 0.9),
+                            url: tab.url,
+                            title: tab.title,
+                            timestamp: new Date().toISOString(),
+                            annotations: []
+                        };
+                        
+                        log('✅ Screenshot object created successfully', 'success');
+                        
+                        // Test saving to storage
+                        const existing = await chrome.storage.local.get('screenshots');
+                        const screenshots = existing.screenshots || [];
+                        screenshots.push(screenshot);
+                        await chrome.storage.local.set({ screenshots: screenshots });
+                        
+                        log(`✅ Screenshot saved! Total screenshots: ${screenshots.length}`, 'success');
+                        
+                    } else {
+                        log('❌ Screenshot capture failed: ' + (response?.error || 'Unknown error'), 'error');
+                    }
+                    
+                } catch (error) {
+                    log('❌ Screenshot test failed: ' + error.message, 'error');
+                }
+            } else {
+                log('❌ Chrome tabs API not available', 'error');
+            }
+        }
+        
+        // Auto-run basic test
+        window.addEventListener('load', () => {
+            log('Extension test page loaded', 'info');
+            log('Ready to test extension functionality', 'info');
+        });
+    </script>
+</body>
+</html>

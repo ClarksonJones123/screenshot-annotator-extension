@@ -187,7 +187,6 @@ metadata:
 test_plan:
   current_focus:
     - "Extension Popup UI"
-    - "Speech-to-Text Annotations"
   stuck_tasks:
     - "Extension Popup UI"
   test_all: false

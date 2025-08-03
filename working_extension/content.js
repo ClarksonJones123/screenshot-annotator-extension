@@ -133,6 +133,7 @@ class AnnotationOverlay {
     status.textContent = 'Enter text and click "Add Annotation", then click on the image below';
     
     controls.appendChild(textInput);
+    controls.appendChild(speechBtn);
     controls.appendChild(addBtn);
     controls.appendChild(closeBtn);
     controls.appendChild(status);
